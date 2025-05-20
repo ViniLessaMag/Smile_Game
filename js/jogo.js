@@ -1,7 +1,6 @@
 // Variáveis de estado do jogo
-let tentativas = 0;
+let rodadas = 0;
 let acertos = 0;
-let rodadasCompletas = 0;
 let jogar = true;
 let cardComSmile = null;
 
@@ -14,7 +13,6 @@ const resposta = document.getElementById('resposta');
 function iniciarJogo() {
     // Escolhe aleatoriamente um card para conter o smile (1-6)
     cardComSmile = Math.floor(Math.random() * 6) + 1;
-    tentativas = 0;
     jogar = true;
     atualizarPlacar();
     btnJogarNovamente.classList.add('invisivel');
@@ -41,9 +39,8 @@ function iniciarJogo() {
 
 // Atualiza o placar
 function atualizarPlacar() {
-    // Calcula a porcentagem baseada em rodadas completas (5 tentativas = 1 rodada)
-    const desempenho = rodadasCompletas > 0 ? Math.round((acertos / rodadasCompletas) * 100) : 0;
-    resposta.textContent = `🎯 Acertos: ${acertos} | 🎲 Tentativas: ${tentativas}/5 | 📊 Desempenho: ${desempenho}%`;
+    const porcentagem = rodadas > 0 ? Math.round((acertos / rodadas) * 100) : 0;
+    resposta.textContent = `🎯 Acertos: ${acertos} | 🎲 Rodadas: ${rodadas}/5 | 📊 Desempenho: ${porcentagem}%`;
 }
 
 // Mostra o smile no card
@@ -55,8 +52,6 @@ function mostrarSmile(card) {
     img.style.height = '80%';
     img.alt = 'Smile';
     img.style.animation = 'flipIn 0.5s ease';
-    
-    // Remove o conteúdo atual mantendo o ID
     card.textContent = '';
     card.appendChild(img);
     
@@ -95,41 +90,41 @@ function verifica(cardClicado) {
         return;
     }
 
-    tentativas++;
+    rodadas++;
     const idCardClicado = parseInt(cardClicado.id);
 
     if (idCardClicado === cardComSmile) {
         // Acertou
         acertos++;
         mostrarSmile(cardClicado);
-        jogar = false;
-        rodadasCompletas++;
-        btnJogarNovamente.classList.remove('invisivel');
     } else {
         // Errou
         cardClicado.classList.add('errou');
         
-        // Verifica se atingiu o limite de tentativas
-        if (tentativas >= 5) {
-            rodadasCompletas++;
-            setTimeout(() => {
-                const cardCorreto = document.getElementById(cardComSmile.toString());
-                mostrarSmile(cardCorreto);
-                jogar = false;
-                btnJogarNovamente.classList.add('invisivel');
-                btnReiniciar.classList.remove('invisivel');
-            }, 500);
-        }
+        // Mostra onde estava o smile após 500ms
+        setTimeout(() => {
+            const cardCorreto = document.getElementById(cardComSmile.toString());
+            mostrarSmile(cardCorreto);
+        }, 500);
     }
 
+    jogar = false;
     atualizarPlacar();
+    
+    // Verifica se atingiu 5 rodadas
+    if (rodadas >= 5) {
+        btnJogarNovamente.classList.add('invisivel');
+        btnReiniciar.classList.remove('invisivel');
+    } else {
+        btnJogarNovamente.classList.remove('invisivel');
+    }
 }
 
 // Event listeners
 btnJogarNovamente.addEventListener('click', iniciarJogo);
 btnReiniciar.addEventListener('click', () => {
+    rodadas = 0;
     acertos = 0;
-    rodadasCompletas = 0;
     iniciarJogo();
 });
 
